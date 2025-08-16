@@ -9,7 +9,6 @@ import SearchBox from '../SearchBox/SearchBox';
 import Modal from '../Modal/Modal';
 import NoteForm from '../NoteForm/NoteForm';
 import Loader from '../Loader/Loader';
-import { useDeleteNote } from '../../hooks/useDeleteNote';
 
 export default function App() {
   const [search, setSearch] = useState('');
@@ -17,15 +16,14 @@ export default function App() {
   const [page, setPage] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     queryKey: ['notes', page, debouncedSearch],
     queryFn: () => fetchNotes({ page, perPage: 12, search: debouncedSearch }),
   });
 
-  const deleteNoteMutation = useDeleteNote();
-
-  const handleDelete = (id: string) => {
-    deleteNoteMutation.mutate(id);
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    setPage(1);
   };
 
   const handleNoteCreated = () => setIsModalOpen(false);
@@ -33,7 +31,7 @@ export default function App() {
   return (
     <div className={css.app}>
       <header className={css.toolbar}>
-        <SearchBox value={search} onChange={setSearch} />
+        <SearchBox value={search} onChange={handleSearchChange} />
         {data && data.totalPages > 1 && (
           <Pagination page={page} setPage={setPage} totalPages={data.totalPages} />
         )}
@@ -42,9 +40,12 @@ export default function App() {
         </button>
       </header>
       {isLoading && <Loader />}
+      {isError && <p>Error loading...</p>}
+      
       {data && data.notes.length > 0 && (
-        <NoteList notes={data.notes} onDelete={handleDelete} />
+        <NoteList notes={data.notes} />
       )}
+      
       {isModalOpen && (
         <Modal onClose={() => setIsModalOpen(false)}>
           <NoteForm onSuccess={handleNoteCreated} />
