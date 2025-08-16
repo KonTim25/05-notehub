@@ -1,9 +1,10 @@
-export default interface Note {
-    'text': string;
+export interface Note {
+    id: string;
+    title: string;
+    content: string;
+    tag: NoteTag;
+    createdAt: string;
+    updatedAt: string;
 }
 
-/*
-Типізація
----------
-Загальні інтерфейси, які пов’язані з сутністю нотатків (Note, NoteTag) мають бути у файлі — src/types/note.ts
-*/
+export type NoteTag = 'Todo' | 'Work' | 'Personal' | 'Meeting' | 'Shopping';

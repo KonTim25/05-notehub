@@ -1,14 +1,59 @@
-/*
-Функції для виконання HTTP-запитів винесіть в окремий файл src/services/noteService.ts. Типізуйте їх параметри, результат, який вони повертають, та відповідь від Axios. У вас мають бути наступні функції:
+import axios, { type AxiosResponse } from 'axios';
+import { type Note, type NoteTag } from '../types/note';
 
-    fetchNotes : має виконувати запит для отримання колекції нотатків із сервера. Повинна підтримувати пагінацію (через параметр сторінки) та фільтрацію за ключовим словом (пошук);
-    
-    createNote: має виконувати запит для створення нової нотатки на сервері. Приймає вміст нової нотатки та повертає створену нотатку у відповіді;
-    
-    deleteNote: має виконувати запит для видалення нотатки за заданим ідентифікатором. Приймає ID нотатки та повертає інформацію про видалену нотатку у відповіді.
+const API_URL = 'https://notehub-public.goit.study/api/notes';
 
-    
-    Типізація
-    ---------
-    Інтерфейси, які описують відповіді http-запитів (FetchNotesResponse і т.д.) та параметри функцій, які виконують http-запити у — src/services/noteService.ts
-*/
+const axiosInstance = axios.create({
+  baseURL: API_URL,
+  headers: {
+    accept: 'application/json',
+    Authorization: `Bearer ${import.meta.env.VITE_NOTEHUB_TOKEN}`,
+  },
+});
+
+export interface FetchNotesParams {
+  page?: number;
+  perPage?: number;
+  search?: string;
+}
+
+export interface FetchNotesResponse {
+  notes: Note[];
+  totalPages: number;
+  totalNotes: number;
+}
+
+export interface CreateNoteParams {
+  title: string;
+  content: string;
+  tag: NoteTag;
+}
+
+export interface CreateNoteResponse {
+  note: Note;
+}
+
+export interface DeleteNoteResponse {
+  note: Note;
+}
+
+export const fetchNotes = async (
+  params: FetchNotesParams
+): Promise<FetchNotesResponse> => {
+  const response: AxiosResponse<FetchNotesResponse> = await axiosInstance.get('', {
+    params,
+  });
+  return response.data;
+};
+
+export const createNote = async (
+  data: CreateNoteParams
+): Promise<CreateNoteResponse> => {
+  const response: AxiosResponse<CreateNoteResponse> = await axiosInstance.post('', data);
+  return response.data;
+};
+
+export const deleteNote = async (id: string): Promise<DeleteNoteResponse> => {
+  const response: AxiosResponse<DeleteNoteResponse> = await axiosInstance.delete(`/${id}`);
+  return response.data;
+};
